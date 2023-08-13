@@ -19,11 +19,11 @@ export default class Game{
         console.log('SWAP IS BEING CALLED');
         if(this.actors[0] == this.actor1){
             this.actors = [this.actor2]
-            this.media = [];
+            this.media = [undefined];
         }
         else{
             this.actors = [this.actor1]
-            this.media = []
+            this.media = [undefined]
         }
         return this;
     }
@@ -38,5 +38,18 @@ export default class Game{
         this.media.push(media);
         this.actors.push(undefined);
     return this;
+    }
+
+    setActor(index: number, actor: Actor){
+        console.log('BEFORE', this.media, this.actors)
+        this.media = this.media.slice(0, index);
+        this.actors = this.actors.slice(0, index);
+        this.actors.push(actor);
+        const actorWasRequired = (actor == this.actor1 || actor == this.actor2);
+        if(!actorWasRequired){
+            this.media.push(undefined);
+        }
+        console.log('AFTER', this.media, this.actors)
+        return this;
     }
 }

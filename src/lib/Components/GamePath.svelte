@@ -22,7 +22,7 @@
     {#if index % 2 == 1}
         <MediaSelector idx={Math.floor(index/2)} actor={actor}/>
     {:else}
-        <ActorView actor={actor}/>
+        <ActorView actor={actor} index={Math.floor(index / 2)}/>
     {/if}
     {/key}
 </div>
