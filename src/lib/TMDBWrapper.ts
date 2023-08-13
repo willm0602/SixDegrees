@@ -144,7 +144,25 @@ export default class TMDBClient {
 		{
 			const res = await this.get(`movie/${media.tmdbID}/credits`);
 			const castData = res.cast;
-			console.log(castData);
+			return castData.map((actor: { [x: string]: any; }): Actor => {
+				return {
+					name: actor['name'],
+					tmdbID: actor['id'],
+					profile_path: actor['profile_path']
+				}
+			})
+		}
+		if(media.mediaType == 'tv')
+		{
+			const res = await this.get(`tv/${media.tmdbID}/credits`);
+			const castData = res.cast;
+			return castData.map((actor: { [x: string]: any; }): Actor => {
+				return {
+					name: actor['name'],
+					tmdbID: actor['id'],
+					profile_path: actor['profile_path']
+				}
+			})
 		}
 		return [];
 	}

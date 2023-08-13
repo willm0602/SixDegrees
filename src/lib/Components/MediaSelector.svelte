@@ -45,7 +45,6 @@
     {:else}
     <span>ERROR LOADING ACTOR</span>
     {/if}
-
 </div>
 
 <Modal components={modalComponentRegistry} />
