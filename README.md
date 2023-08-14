@@ -1,5 +1,6 @@
 ## What is this?
-This is a web app built with SvelteKit to play the game of Six-Degrees of Kevin Bacon (except neither actor necessarily needs to be Kevin Bacon). 
+
+This is a web app built with SvelteKit to play the game of Six-Degrees of Kevin Bacon (except neither actor necessarily needs to be Kevin Bacon).
 
 To use this, follow the steps below to develop on your computer and click "play".
 

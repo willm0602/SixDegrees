@@ -5,14 +5,13 @@ import type Actor from './Game/Actor';
 import type Media from './Game/Media';
 import type Role from './Game/Role';
 
-
 type TMDBActorInfo = {
 	known_for: any;
-	name: string,
-	profile_path: string,
-	id: number,
-	popularity: number
-}
+	name: string;
+	profile_path: string;
+	id: number;
+	popularity: number;
+};
 
 export default class TMDBClient {
 	API_KEY: string;
@@ -83,33 +82,31 @@ export default class TMDBClient {
 		const movieCredits = await this.getMovieCreditsForActor(id);
 		const tvCredits = await this.getTVCreditsForActor(id);
 		const credits = [...movieCredits, ...tvCredits].sort((a, b) => {
-			if(a.media == undefined)
-				return -1;
-			if(b.media == undefined)
-				return 1;
+			if (a.media == undefined) return -1;
+			if (b.media == undefined) return 1;
 			return a.media.title.localeCompare(b.media.title);
-		})
+		});
 		return credits;
 	}
 
 	async getMovieCreditsForActor(id: number): Promise<Role[]> {
 		const movieData = await this.get(`person/${id}/movie_credits`);
 		const actingCredits = movieData.cast;
-		const roles: Role[] = actingCredits.map((credit: {
-			poster_path: string; character: any; title: any; id: any 
-		}) => {
-			const media: Media = {
-				title: credit.title,
-				tmdbID: credit.id,
-				mediaType: 'movie',
-				posterPath: credit.poster_path
-			};
-			return {
-				actorID: id,
-				media,
-				characterName: credit.character
-			};
-		});
+		const roles: Role[] = actingCredits.map(
+			(credit: { poster_path: string; character: any; title: any; id: any }) => {
+				const media: Media = {
+					title: credit.title,
+					tmdbID: credit.id,
+					mediaType: 'movie',
+					posterPath: credit.poster_path
+				};
+				return {
+					actorID: id,
+					media,
+					characterName: credit.character
+				};
+			}
+		);
 		return roles;
 	}
 
@@ -118,7 +115,11 @@ export default class TMDBClient {
 		const actingCredits = tvData.cast;
 		const roles: Role[] = actingCredits.map(
 			(credit: {
-				poster_path: string; original_name: string; character: string; title: string; id: number 
+				poster_path: string;
+				original_name: string;
+				character: string;
+				title: string;
+				id: number;
 			}) => {
 				const media: Media = {
 					title: credit.original_name,
@@ -136,33 +137,31 @@ export default class TMDBClient {
 		return roles;
 	}
 
-	async getActorsForMedia(media: Media): Promise<Actor[]>{
-		if(!media){
+	async getActorsForMedia(media: Media): Promise<Actor[]> {
+		if (!media) {
 			return [];
 		}
-		if(media.mediaType == 'movie')
-		{
+		if (media.mediaType == 'movie') {
 			const res = await this.get(`movie/${media.tmdbID}/credits`);
 			const castData = res.cast;
-			return castData.map((actor: { [x: string]: any; }): Actor => {
+			return castData.map((actor: { [x: string]: any }): Actor => {
 				return {
 					name: actor['name'],
 					tmdbID: actor['id'],
 					profile_path: actor['profile_path']
-				}
-			})
+				};
+			});
 		}
-		if(media.mediaType == 'tv')
-		{
+		if (media.mediaType == 'tv') {
 			const res = await this.get(`tv/${media.tmdbID}/credits`);
 			const castData = res.cast;
-			return castData.map((actor: { [x: string]: any; }): Actor => {
+			return castData.map((actor: { [x: string]: any }): Actor => {
 				return {
 					name: actor['name'],
 					tmdbID: actor['id'],
 					profile_path: actor['profile_path']
-				}
-			})
+				};
+			});
 		}
 		return [];
 	}
