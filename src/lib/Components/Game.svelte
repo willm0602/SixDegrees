@@ -4,6 +4,7 @@
 	import GamePath from "./GamePath.svelte";
 
     import 'iconify-icon'
+	import AllModals from "./Modals/AllModals.svelte";
 
     let currGame = $game as Game;
 
@@ -17,6 +18,8 @@
     }
 
 </script>
+
+<AllModals/>
 
 <div class="flex flex-col w-full mt-20 items-center justify-center">
     <!-- svelte-ignore a11y-click-events-have-key-events -->

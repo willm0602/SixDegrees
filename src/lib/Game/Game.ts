@@ -16,7 +16,6 @@ export default class Game {
 	}
 
 	swap(): Game {
-		console.log('SWAP IS BEING CALLED');
 		if (this.actors[0] == this.actor1) {
 			this.actors = [this.actor2];
 			this.media = [undefined];
@@ -40,15 +39,23 @@ export default class Game {
 	}
 
 	setActor(index: number, actor: Actor) {
-		console.log('BEFORE', this.media, this.actors);
 		this.media = this.media.slice(0, index);
 		this.actors = this.actors.slice(0, index);
 		this.actors.push(actor);
-		const actorWasRequired = actor == this.actor1 || actor == this.actor2;
-		if (!actorWasRequired) {
+		if (!this.gameHasWon()) {
 			this.media.push(undefined);
 		}
-		console.log('AFTER', this.media, this.actors);
 		return this;
+	}
+
+	gameHasWon(): boolean {
+		return this.hasActor(this.actor1) && this.hasActor(this.actor2);
+	}
+
+	hasActor(actor: Actor): boolean{
+		for(const actorInList of this.actors)
+			if(actor?.tmdbID == actorInList?.tmdbID)
+				return true;
+		return false;
 	}
 }

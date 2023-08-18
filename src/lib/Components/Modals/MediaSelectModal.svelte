@@ -1,15 +1,16 @@
 <script lang="ts">
-    import type Actor from "../Actor.svelte";
     import type Role from "$lib/Game/Role";
 	import { writable } from "svelte/store";
 
     import 'iconify-icon'
 
     import {game} from "$lib/dataStore";
-	import { modalStore } from "@skeletonlabs/skeleton";
+	import {editingMediaIndex} from "$lib/dataStore"
+    import { modalStore } from "@skeletonlabs/skeleton";
 
-    export let actor: Actor;
-    export let idx: number;
+
+    const idx = $editingMediaIndex;
+    const actor = $game?.actors[idx];
 
     let searchQuery = writable("");
 
@@ -31,10 +32,12 @@
                 'cache': 'force-cache',
             });
             return roles.json().then((data) => {
-                allRoles = data.filter((role: Role) => {
-                    return role.media?.posterPath
-                });
-                foundRoles = allRoles;
+                if(data){
+                    allRoles = data.filter((role: Role) => {
+                        return role.media?.posterPath
+                    });
+                    foundRoles = allRoles;
+                }
             });
         }
         return [];
@@ -47,23 +50,28 @@
         <div class="input w-1/2 m-8 flex">
             <iconify-icon icon="material-symbols:search" class="text-4xl"/>
             <input type="text" class="flex-1 bg-surface-700" bind:value={$searchQuery}>
+            <button on:click={getActorRoles}>
+                <iconify-icon icon="material-symbols:refresh" class="text-4xl"/>
+            </button>
         </div>
     </div>
     {#await getActorRoles()}
         <span>Loading Roles...</span>
     {:then _}
         <div class="flex flex-wrap columns-3 bg-surface-800 max-h-9/10 justify-center">
+            {#key foundRoles}
             {#each foundRoles as role}
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <a title="{`${role.media?.title}`}" rel="tooltip">
-                    <button class="card w-36 p-4 m-6 hover:bg-surface-600" on:click={() => {
-                        game.set($game?.setMedia(idx, role.media));
-                        modalStore.close();
-                    }}>
+            <!-- svelte-ignore a11y-missing-attribute -->
+            <a title="{`${role.characterName} in ${role.media?.title}`}" rel="tooltip">
+                <button class="card w-36 p-4 m-6 hover:bg-surface-600" on:click={() => {
+                    game.set($game?.setMedia(idx, role.media));
+                    modalStore.close();
+                }}>
                         <img class="w-full h-120" src={`https://image.tmdb.org/t/p/w300/${role.media?.posterPath}`} alt={`Image of ${role.media?.title}`}>
                     </button>
                 </a>
-            {/each}
+                {/each}
+            {/key}
         </div>
     {/await}
 </div>

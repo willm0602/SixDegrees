@@ -6,11 +6,11 @@
 
     import 'iconify-icon'
 
-    import {game} from "$lib/dataStore";
+    import {game, editingActorIndex} from "$lib/dataStore";
 	import { modalStore } from "@skeletonlabs/skeleton";
 
-    export let media: Media;
-    export let idx: number;
+    const idx = $editingActorIndex;
+    const media = $game?.media[idx-1];
 
     let searchQuery = writable("");
 
@@ -21,7 +21,7 @@
         const lowercaseQuery = query.toLowerCase();
         if(allActors){
             foundActors = allActors.filter((actor) => {
-                actor?.profile_path && actor.name.toLowerCase().includes(lowercaseQuery);
+                return actor?.profile_path && actor.name.toLowerCase().includes(lowercaseQuery);
             })
         }
     })
@@ -32,11 +32,12 @@
                 'cache': 'force-cache',
             });
             return roles.json().then((data) => {
-                console.log(data);
-                allActors = data.filter((actor: Actor) => {
-                    return actor && actor.profile_path
-                });
-                foundActors = allActors;
+                if(data){
+                    allActors = data.filter((actor: Actor) => {
+                        return actor && actor.profile_path
+                    });
+                    foundActors = allActors;
+                }
             });
         }
         return [];

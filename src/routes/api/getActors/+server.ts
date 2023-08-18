@@ -5,9 +5,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export async function GET(request: RequestEvent): Promise<Response> {
-	console.log('afaf');
 	const mediaData: string = request.url.searchParams.get('media') || '';
-	console.log('Media', mediaData);
 
 	const media: Media = JSON.parse(mediaData);
 

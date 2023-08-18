@@ -2,31 +2,21 @@
 	import type Actor from "$lib/Game/Actor";
 	import { modalStore, type ModalComponent, type ModalSettings, Modal } from "@skeletonlabs/skeleton";
 
-    import {game} from "$lib/dataStore";
+    import {editingActorIndex, game} from "$lib/dataStore";
 
     import UnknownImg from "$lib/assets/unknown.png";
 
-    import ActorSelectModal from "./Modals/ActorSelectModal.svelte";
 	import type Media from "$lib/Game/Media";
 
     export let index: number;
+    (index);
     export let actor: Actor;
-    export let css: string;
+    export let css: string = "";
 
-    const media: Media = $game?.media[index];
-
-    const modalComponentRegistry: Record<string, ModalComponent> = {
-        actorSelectModal: {
-            ref: ActorSelectModal,
-            props: {
-                actor,
-                media,
-                index
-            }
-        },
-    };
+    const media: Media = $game?.media[index-1];
 
     const showModal = (component: string) => {
+        editingActorIndex.set(index);
         const modal: ModalSettings = {
             type: 'component',
             component: component,
@@ -36,11 +26,11 @@
 
 </script>
 
-<div class="flex flex-col items-center">
+<div class="flex flex-col items-center w-25">
     {#if media}
         <button class="flex flex-col justify-center items-center" on:click={()=>{showModal('actorSelectModal')}}>
             <!-- svelte-ignore a11y-missing-attribute -->
-            <a rel="tooltip" title="{actor?.name}">
+            <a class="flex flex-col items-center" rel="tooltip" title="{actor?.name}">
                 {#if actor}
                 <img class="h-30 w-20 {css}" src={`https://image.tmdb.org/t/p/w300/${actor.profile_path}`} alt={`Poster for ${actor.name}`}/>
                 <span>{actor.name}</span>
@@ -53,5 +43,3 @@
     <span>ERROR LOADING ACTOR</span>
     {/if}
 </div>
-
-<Modal components={modalComponentRegistry} />
