@@ -1,7 +1,7 @@
 <script>
 	import '../app.postcss';
 
-		// Your selected Skeleton theme:
+	// Your selected Skeleton theme:
 	import '@skeletonlabs/skeleton/themes/theme-crimson.css';
 
 	// This contains the bulk of Skeletons required styles:
@@ -9,8 +9,12 @@
 
 	// Finally, your application's global stylesheet (sometimes labeled 'app.css')
 	import '../app.postcss';
+
+
+	import Header from '$lib/Components/Header.svelte';
 </script>
 
-<main class="bg-surface-50-900-token w-full h-screen font-mono">
-	<slot/>
+<main class="bg-surface-50-900-token w-full h-screen font-mono flex flex-col">
+	<Header/>
+	<slot />
 </main>

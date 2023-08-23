@@ -1,15 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // wrapper for the TMDB API
-// https://developer.themoviedb.org/v4/docs
+// https://developer.themoviedb.org/v3/docs
 
 import type Actor from './Game/Actor';
 import type Media from './Game/Media';
 import type Role from './Game/Role';
-import delay from './ServerUtils';
+import { delay } from './ServerUtils';
 
 const InvalidTVGenres = [
 	// Dont count talk-shows
 	10767
+];
+
+const InvalidActorIDs = [
+	// Actors that we don't want to include in queries
+	58021
 ]
+
+type TMDBActorResponse = {
+	results: TMDBActorInfo[];
+};
 
 type TMDBActorInfo = {
 	known_for: any;
@@ -28,7 +38,7 @@ export default class TMDBClient {
 
 	// makes a GET call to the TMDB API
 	// returns a promise
-	get(path: string, params: any = {}) {
+	get(path: string, params: any = {}): any {
 		try {
 			const url = new URL('https://api.themoviedb.org/3/' + path);
 			url.searchParams.append('api_key', this.API_KEY);
@@ -58,11 +68,14 @@ export default class TMDBClient {
 
 	async getRandomActor(excludeID?: number | undefined): Promise<TMDBActorInfo> {
 		const page = Math.floor(Math.random() * 10 + 1);
-		const actors = await this.get('person/popular', { page });
+		const actors: TMDBActorResponse = await this.get('person/popular', { page });
 		const MIN_POPULARITY = 40;
+		const idsToExclude = InvalidActorIDs;
+		if(excludeID)
+			idsToExclude.push(excludeID);
 		const popularActors = actors.results.filter((actor: TMDBActorInfo) => {
 			if (actor.popularity <= MIN_POPULARITY) return false;
-			if (actor.id == excludeID) {
+			if (idsToExclude.includes(actor.id)) {
 				return false;
 			}
 			for (const knownWork of actor.known_for) {
@@ -86,15 +99,13 @@ export default class TMDBClient {
 		const tvCredits = await this.getTVCreditsForActor(id);
 		const foundTitles: string[] = [];
 		const allCredits = [...movieCredits, ...tvCredits].filter((role: Role) => {
-			if(role.media == undefined)
-				return false;
-			if(foundTitles.includes(role.media.title))
-			{
+			if (role.media == undefined) return false;
+			if (foundTitles.includes(role.media.title)) {
 				return false;
 			}
 			foundTitles.push(role.media.title);
 			return true;
-		})
+		});
 
 		const credits = allCredits.sort((a, b) => {
 			if (a.media == undefined) return -1;
@@ -106,8 +117,7 @@ export default class TMDBClient {
 
 	async getMovieCreditsForActor(id: number): Promise<Role[]> {
 		const movieData = await this.get(`person/${id}/movie_credits`);
-		if(movieData){
-
+		if (movieData) {
 			const actingCredits = movieData.cast;
 			const roles: Role[] = actingCredits.map(
 				(credit: { poster_path: string; character: any; title: any; id: any }) => {
@@ -132,17 +142,13 @@ export default class TMDBClient {
 	async getTVCreditsForActor(id: number): Promise<Role[]> {
 		const tvData = await this.get(`person/${id}/tv_credits`);
 		const actingCredits = tvData.cast;
-		if(actingCredits){
-
-			const validActingCredits = actingCredits.filter(
-				(credit: {genre_ids: number[]}) => {
-					for(const invalidGenre of InvalidTVGenres){
-						if(credit.genre_ids.includes(invalidGenre))
-							return false;
-					}
-					return true;
+		if (actingCredits) {
+			const validActingCredits = actingCredits.filter((credit: { genre_ids: number[] }) => {
+				for (const invalidGenre of InvalidTVGenres) {
+					if (credit.genre_ids.includes(invalidGenre)) return false;
 				}
-			)
+				return true;
+			});
 			const roles: Role[] = validActingCredits.map(
 				(credit: {
 					poster_path: string;
@@ -175,7 +181,7 @@ export default class TMDBClient {
 		}
 		if (media.mediaType == 'movie') {
 			const res = await this.get(`movie/${media.tmdbID}/credits`);
-			if(res){
+			if (res) {
 				const castData = res.cast;
 				return castData.map((actor: { [x: string]: any }): Actor => {
 					return {
@@ -187,9 +193,9 @@ export default class TMDBClient {
 			}
 		}
 		if (media.mediaType == 'tv') {
-			const res = await this.get(`tv/${media.tmdbID}/credits`);
-			if(res){
-				const castData = await this.get(`tv/${media.tmdbID}/credits`);
+			const res = await this.get(`tv/${media.tmdbID}/aggregate_credits`);
+			if (res) {
+				const castData = await this.get(`tv/${media.tmdbID}/aggregate_credits`);
 				return castData.cast.map((actor: { [x: string]: any }): Actor => {
 					return {
 						name: actor['name'],
@@ -200,5 +206,20 @@ export default class TMDBClient {
 			}
 		}
 		return [];
+	}
+
+	async getActorByID(id: number): Promise<TMDBActorInfo>{
+		const req = await this.get(`person/${id}`);
+		if(req.id){
+			return {
+				id,
+				known_for: [],
+				name: req.name,
+				profile_path: req.profile_path,
+				popularity: req.popularity
+			}
+		}
+		const fallbackActor: TMDBActorInfo = await this.getRandomActor();
+		return fallbackActor;
 	}
 }

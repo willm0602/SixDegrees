@@ -1,11 +1,14 @@
 import type Actor from './Actor';
 import type Media from './Media';
 
+type OptionalActor = Actor | undefined;
+type OptionalMedia = Media | undefined;
+
 export default class Game {
 	actor1: Actor;
 	actor2: Actor;
-	actors: Actor[];
-	media: Media[];
+	actors: OptionalActor[];
+	media: OptionalMedia[];
 
 	constructor(actor1: Actor, actor2: Actor) {
 		this.actor1 = actor1;
@@ -52,10 +55,12 @@ export default class Game {
 		return this.hasActor(this.actor1) && this.hasActor(this.actor2);
 	}
 
-	hasActor(actor: Actor): boolean{
-		for(const actorInList of this.actors)
-			if(actor?.tmdbID == actorInList?.tmdbID)
-				return true;
+	hasActor(actor: Actor): boolean {
+		for (const actorInList of this.actors) if (actor?.tmdbID == actorInList?.tmdbID) return true;
 		return false;
+	}
+
+	lastActor(): OptionalActor {
+		return this.actors[this.actors.length - 1];
 	}
 }

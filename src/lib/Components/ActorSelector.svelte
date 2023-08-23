@@ -1,45 +1,45 @@
 <script lang="ts">
-	import type Actor from "$lib/Game/Actor";
-	import { modalStore, type ModalComponent, type ModalSettings, Modal } from "@skeletonlabs/skeleton";
+	import type Actor from '$lib/Game/Actor';
+	import {
+		modalStore,
+		type ModalSettings,
+		Modal
+	} from '@skeletonlabs/skeleton';
 
-    import {editingActorIndex, game} from "$lib/dataStore";
+	import { editingActorIndex, game } from '$lib/dataStore';
 
-    import UnknownImg from "$lib/assets/unknown.png";
 
-	import type Media from "$lib/Game/Media";
+	import type Media from '$lib/Game/Media';
+	import ActorCard from './ActorCard.svelte';
 
-    export let index: number;
-    (index);
-    export let actor: Actor;
-    export let css: string = "";
+	export let index: number;
+	index;
+	export let actor: Actor | undefined;
+	export let imgCSS = '';
+	const media: Media | undefined = $game?.media[index - 1];
 
-    const media: Media = $game?.media[index-1];
-
-    const showModal = (component: string) => {
-        editingActorIndex.set(index);
-        const modal: ModalSettings = {
-            type: 'component',
-            component: component,
-        };
-        modalStore.trigger(modal);
-    }
-
+	const showModal = () => {
+		editingActorIndex.set(index);
+		const modal: ModalSettings = {
+			type: 'component',
+			component: 'actorSelectModal'
+		};
+		modalStore.trigger(modal);
+	};
 </script>
 
 <div class="flex flex-col items-center w-25">
-    {#if media}
-        <button class="flex flex-col justify-center items-center" on:click={()=>{showModal('actorSelectModal')}}>
-            <!-- svelte-ignore a11y-missing-attribute -->
-            <a class="flex flex-col items-center" rel="tooltip" title="{actor?.name}">
-                {#if actor}
-                <img class="h-30 w-20 {css}" src={`https://image.tmdb.org/t/p/w300/${actor.profile_path}`} alt={`Poster for ${actor.name}`}/>
-                <span>{actor.name}</span>
-                {:else}
-                <img style="height:7.5em;" class="h-30 w-20 {css}" src={UnknownImg} alt={`Unselected movie`}/>
-                {/if}
-            </a>
-        </button>
-    {:else}
-    <span>ERROR LOADING ACTOR</span>
-    {/if}
+	{#if media}
+		<button
+			class="flex flex-col justify-center items-center"
+			on:click={() => {
+				showModal();
+			}}
+		>
+			<!-- svelte-ignore a11y-missing-attribute -->
+			<ActorCard {actor} {imgCSS} />
+		</button>
+	{:else}
+		<span>ERROR LOADING ACTOR</span>
+	{/if}
 </div>
