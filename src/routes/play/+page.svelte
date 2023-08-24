@@ -11,6 +11,8 @@
 	export let data;
 	const { actors } = data;
 	const initGame = new Game(actors[0], actors[1]);
+	initGame.start();
+	console.log('INIT', initGame)
 
 	game.set(initGame);
 

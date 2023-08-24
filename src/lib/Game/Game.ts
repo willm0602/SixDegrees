@@ -9,6 +9,8 @@ export default class Game {
 	actor2: Actor;
 	actors: OptionalActor[];
 	media: OptionalMedia[];
+	startTime: Date | undefined;
+	endTime: Date | undefined;
 
 	constructor(actor1: Actor, actor2: Actor) {
 		this.actor1 = actor1;
@@ -58,6 +60,24 @@ export default class Game {
 	hasActor(actor: Actor): boolean {
 		for (const actorInList of this.actors) if (actor?.tmdbID == actorInList?.tmdbID) return true;
 		return false;
+	}
+
+	start() {
+		if(this.startTime == undefined){
+			this.startTime = new Date();
+		}
+	}
+
+	finish() {
+		if(this.endTime == undefined)
+			this.endTime = new Date();
+	}
+
+	getTotalTime(): Date | undefined {
+		if(this.startTime && this.endTime){
+			const timeAsNum = this.endTime.getTime() - this.startTime.getTime();
+			return new Date(timeAsNum);
+		}
 	}
 
 	lastActor(): OptionalActor {
