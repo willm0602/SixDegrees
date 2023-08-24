@@ -1,10 +1,9 @@
 <script lang="ts">
     import {game} from "$lib/dataStore";
-	import { redirect } from "@sveltejs/kit";
 	import ActorCard from "../ActorCard.svelte";
-	import { page } from "$app/stores";
 
-    const css = "w-30 h-44"
+    const css = "w-30 h-44";
+    const totalTime: Date | undefined = $game?.getTotalTime();
 </script>
 
 {#if $game}
@@ -29,12 +28,16 @@
             </div>
             {/each}
         </div>
+        <h2 class="h2 text-center">
+            {#if totalTime}
+                Completed in {totalTime.getMinutes()}:{(totalTime.getSeconds() < 10) ? '0' : ''}{totalTime.getSeconds()}
+            {:else}
+                Error getting time!
+            {/if}
+        </h2>
         <div class="flex space-evenly w-full justify-center mt-8">
             <button class="btn variant-filled-surface mx-10" on:click={()=>{window.location.reload();}}>Try this pairing again</button>
-            <button class="cursor-pointer btn variant-filled-surface mx-10" on:click={()=>{
-                const newLocation = window.location.pathname
-                window.location.pathname = newLocation.split('?')[0];
-            }}>Try a new game</button>
+            <a class="cursor-pointer btn variant-filled-surface mx-10" href="/play" data-sveltekit-reload>Try a new game</a>
         </div>
     </div>
 {/if}

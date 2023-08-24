@@ -50,6 +50,7 @@
 	};
 	function checkForWin() {
 		if($game?.gameHasWon()){
+			$game.finish();
 			modalStore.trigger(gameSummaryModal);
 		}
 	}

@@ -13,7 +13,11 @@
 	export let actor: Actor;
 	export let imgCSS = '';
 
-	const media: Writable<Media | undefined> = writable($game && $game.media.length > idx ? $game.media[idx] : undefined);
+	const media: Writable<Media | undefined> = writable(
+		($game && $game.media.length > idx) ? 
+			$game.media[idx] : 
+			undefined
+	);
 
 	const showModal = (component: string) => {
 		editingMediaIndex.set(idx);
