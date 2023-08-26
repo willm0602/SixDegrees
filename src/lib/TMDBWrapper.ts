@@ -70,7 +70,7 @@ export default class TMDBClient {
 	async getRandomActor(excludeID?: number | undefined): Promise<TMDBActorInfo> {
 		const page = Math.floor(Math.random() * 10 + 1);
 		const actors: TMDBActorResponse = await this.get('person/popular', { page });
-		const MIN_POPULARITY = 40;
+		const MIN_POPULARITY = 35;
 		const idsToExclude = InvalidActorIDs;
 		if(excludeID)
 			idsToExclude.push(excludeID);

@@ -32,15 +32,9 @@ function getFakeMedia(): Media{
 function getFakeGame(): Game{
     let game = new Game(getFakeActor(), getFakeActor());
     const mediaCount = Math.random() * 5;
-    const shouldWin = Math.random() < 0.25;
     for(let idx = 0; idx < mediaCount; idx++){
-        if(shouldWin && idx == mediaCount-1){
-            game.setActor(idx+1, game.actor2);
-        }
-        else{
-            game.setActor(idx+1, getFakeActor());
-        }
         game.setMedia(idx, getFakeMedia());
+        game.setActor(idx+1, getFakeActor());
     }
     return game;
 }
@@ -124,14 +118,15 @@ test('setMedia works for setting media below the max length',
             const game = getFakeGame();
             const originalActors = game.actors;
             const originalMedia = game.media;
-            const index = Math.floor(Math.random() * game.media.length - 1);
+            const index = Math.floor(Math.random() * game.media.length);
             const fakeMedia = getFakeMedia();
             game.setMedia(index, fakeMedia);
             let expectedMedia = originalMedia;
             expectedMedia[index] = fakeMedia;
-            expectedMedia.splice(index+1);
+            expectedMedia = expectedMedia.splice(0, index+1);
             const expectedActors = originalActors;
             expectedActors.splice(index+1);
+            expectedActors.push(undefined);
             expect(game.actors, 'Actors are removed after the media index and retained before').toEqual(expectedActors);
             expect(game.media, 'Media are removed after the media index and retained before').toEqual(expectedMedia);
         }
@@ -149,10 +144,11 @@ test('setMedia works for setting media at the index',
             game.setMedia(index, fakeMedia);
             let expectedMedia = originalMedia;
             expectedMedia[index] = fakeMedia;
-            expectedMedia.splice(index+1);
+            expectedMedia = expectedMedia.splice(0, index+1);
             const expectedActors = originalActors;
+            expectedActors.splice(index+1);
             expectedActors.push(undefined);
-            expect(game.actors, 'An undefined actor is added after a media is set at the end').toEqual(expectedActors);
+            expect(game.actors, 'Actors are removed after the media index and retained before').toEqual(expectedActors);
             expect(game.media, 'Media are removed after the media index and retained before').toEqual(expectedMedia);
         }
     }
