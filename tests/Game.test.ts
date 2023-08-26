@@ -29,9 +29,9 @@ function getFakeMedia(): Media{
     return testMedia;
 }
 
-function getFakeGame(): Game{
+function getFakeGame(minMediaCount = 0): Game{
     let game = new Game(getFakeActor(), getFakeActor());
-    const mediaCount = Math.random() * 5;
+    const mediaCount = minMediaCount + Math.random() * (5 - minMediaCount);
     for(let idx = 0; idx < mediaCount; idx++){
         game.setMedia(idx, getFakeMedia());
         game.setActor(idx+1, getFakeActor());
@@ -112,6 +112,8 @@ test('pathSize should return the total of the amount of media and the amount of 
     }
 )
 
+
+// tests for setting media
 test('setMedia works for setting media below the max length',
     () => {
         for(let _ = 0; _ < 100; _++){
@@ -150,6 +152,76 @@ test('setMedia works for setting media at the index',
             expectedActors.push(undefined);
             expect(game.actors, 'Actors are removed after the media index and retained before').toEqual(expectedActors);
             expect(game.media, 'Media are removed after the media index and retained before').toEqual(expectedMedia);
+        }
+    }
+)
+
+
+// tests for setting actors
+test('setActor works for setting an actor in the middle',
+    () => {
+        for(let _ = 0; _ < 100; _++){
+            const game = getFakeGame();
+            const originalActors = game.actors;
+            const originalMedia = game.media;
+            const index = 1 + Math.floor(game.actors.length - 1);
+            const fakeActor = getFakeActor();
+            game.setActor(index, fakeActor);
+            let expectedActors = originalActors;
+            expectedActors[index] = fakeActor;
+            expectedActors = expectedActors.splice(0, index+1);
+            const expectedMedia = originalMedia.splice(0, index+1);
+            expect(game.actors, 'After setting an actor, all following actors should be cleared').toEqual(expectedActors);
+            expect(game.media, 'After setting an actor, all following media should be cleared').toEqual(expectedMedia);
+        }
+    }
+)
+
+test('setActor works for setting an actor at the end',
+    () => {
+        for(let _ = 0; _ < 100; _++){
+            const game = getFakeGame();
+            const originalActors = game.actors;
+            const originalMedia = game.media;
+            const index = game.actors.length - 1;
+            const fakeActor = getFakeActor();
+            game.setActor(index, fakeActor);
+            let expectedActors = originalActors;
+            expectedActors[index] = fakeActor;
+            expectedActors = expectedActors.splice(0, index+1);
+            const expectedMedia = originalMedia.splice(0, index+1);
+            expect(game.actors, 'After setting an actor, all following actors should be cleared').toEqual(expectedActors);
+            expect(game.media, 'After setting an actor, all following media should be cleared').toEqual(expectedMedia);
+        }
+    }
+)
+
+
+// tests for checking if a game has been won
+test('gameHasWon can only return true if both actors are in the list',
+    () => {
+        for(let _ = 0; _ < 100; _++){
+            const game = getFakeGame();
+            // the way getFakeGame works means it never returns 2 actors in a list,
+            // so we can assume gameHasWon will always return false unless we manually add
+            // the last actor to the list
+            expect(game.gameHasWon(), 'If a game does not have both actors, it should return false').toEqual(false);
+            game.swap();
+            expect(game.gameHasWon(), 'If a game does not have both actors, it should return false').toEqual(false);
+        }
+    }
+)
+
+test('gameHasWon must return true if both actors are in the list',
+    () => {
+        for(let _ = 0; _ < 100; _++){
+            const game = getFakeGame(2);
+            const lastIndex = game.actors.length - 1;
+
+            game.actors[0] = game.actor1;
+            game.actors[lastIndex] = game.actor2;
+        // if both actors are on each end, we should have "gameHasWon" return true
+
         }
     }
 )
