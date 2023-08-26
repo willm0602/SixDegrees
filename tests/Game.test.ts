@@ -10,22 +10,28 @@ import type Media from '$lib/Game/Media';
  * Test data
  */
 
+let testActorsMade = 0;
+let testMediaMade = 0;
+
 function getFakeActor(): Actor{
     const testActor: Actor = {
         name: faker.person.fullName(),
         profile_path: 'TMDB PROFILE PATH',
-        tmdbID: -1
+        tmdbID: testActorsMade
     };
+    testActorsMade+=1;
+
     return testActor;
 }
 
 function getFakeMedia(): Media{
     const testMedia: Media = {
         title: faker.color.human() + ' ' + faker.commerce.product(),
-        tmdbID: -1,
+        tmdbID: testMediaMade,
         mediaType: Math.random() < 0.5 ? 'movie' : 'tv',
         posterPath: 'TMDB PROFILE PATH'
     }
+    testMediaMade+=1;
     return testMedia;
 }
 
@@ -164,7 +170,7 @@ test('setActor works for setting an actor in the middle',
             const game = getFakeGame();
             const originalActors = game.actors;
             const originalMedia = game.media;
-            const index = 1 + Math.floor(game.actors.length - 1);
+            const index = 1 + Math.floor(game.actors.length - 2);
             const fakeActor = getFakeActor();
             game.setActor(index, fakeActor);
             let expectedActors = originalActors;
@@ -172,7 +178,7 @@ test('setActor works for setting an actor in the middle',
             expectedActors = expectedActors.splice(0, index+1);
             const expectedMedia = originalMedia.splice(0, index+1);
             expect(game.actors, 'After setting an actor, all following actors should be cleared').toEqual(expectedActors);
-            expect(game.media, 'After setting an actor, all following media should be cleared').toEqual(expectedMedia);
+            expect(game.media, `[${index}] After setting an actor, all following media should be cleared`).toEqual(expectedMedia);
         }
     }
 )
@@ -215,13 +221,41 @@ test('gameHasWon can only return true if both actors are in the list',
 test('gameHasWon must return true if both actors are in the list',
     () => {
         for(let _ = 0; _ < 100; _++){
-            const game = getFakeGame(2);
+            const game = getFakeGame(3);
             const lastIndex = game.actors.length - 1;
 
             game.actors[0] = game.actor1;
             game.actors[lastIndex] = game.actor2;
-        // if both actors are on each end, we should have "gameHasWon" return true
+            // if both actors are on each end, we should have "gameHasWon" return true
 
+            expect(game.gameHasWon(), `[${_}] game with actor1 and actor2 at the end doesn't detect that the game has been won`).toEqual(true);
+
+            // check if it still works if the actors are swapped
+            game.actors[0] = game.actor2;
+            game.actors[lastIndex] = game.actor1;
+
+            expect(game.gameHasWon(), `[${_}] game with actor2 and actor1 at the end doesn't detect that the game has been won`).toEqual(true);
+
+
+            // Should also work if actor1 is in the middle
+            game.actors[1] = game.actor1;
+            game.actors[0] = getFakeActor();
+            game.actors[lastIndex] = game.actor2;
+            expect(game.gameHasWon(), `[${_}] game with actor1 in the middle doesn't detect that the game has been won`).toEqual(true);
+
+            // should also work if actor2 is in the middle
+            game.actors[0] = game.actor1
+            game.actors[1] = game.actor2
+            game.actors[lastIndex] = getFakeActor();
+            expect(game.gameHasWon(), `[${_}] game with actor2 in the middle doesn't detect that the game has been won`).toEqual(true);
+
+            // or if both actors are in the middle
+            game.actors[0] = getFakeActor();
+            game.actors[1] = game.actor1;
+            game.actors[2] = game.actor2;
+            game.actors[lastIndex] = getFakeActor();
+            expect(game.gameHasWon(), `[${_}] game with both actors in the middle doesn't detect that the game has been won`).toEqual(true);
         }
     }
 )
+
