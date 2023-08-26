@@ -41,8 +41,8 @@
 <Carousel>
 	{#key $game}
 		{#if $game}
-			{#each { length: $game ? $game.pathSize() : 0 } as _, idx}
-				<GamePath indexgetPathSize>
+			{#each { length: $game ? $game.getPathSize() : 0 } as _, idx}
+				<GamePath index={idx} />
 			{/each}
 		{/if}
 	{/key}
