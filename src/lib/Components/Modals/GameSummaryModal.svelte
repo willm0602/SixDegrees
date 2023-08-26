@@ -13,7 +13,7 @@
             {#each $game.media as media, idx}
             <div class="li pb-4 flex mx-10">
                 {#if $game.actors[idx]}
-                    <ActorCard actor={$game.actors[idx]} imgCSS="{css}"/>
+                  getLastActorard actor={$game.actors[idx]} imgCSS="{css}"/>
                 {/if}
                 {#if media}
                     <img

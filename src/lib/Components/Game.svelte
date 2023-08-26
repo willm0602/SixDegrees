@@ -42,7 +42,7 @@
 	{#key $game}
 		{#if $game}
 			{#each { length: $game ? $game.pathSize() : 0 } as _, idx}
-				<GamePath index={idx} />
+				<GamePath indexgetPathSize>
 			{/each}
 		{/if}
 	{/key}

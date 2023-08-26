@@ -31,7 +31,7 @@ export default class Game {
 		return this;
 	}
 
-	pathSize(): number {
+	getPathSize(): number {
 		return this.actors.length + this.media.length;
 	}
 
@@ -80,7 +80,7 @@ export default class Game {
 		}
 	}
 
-	lastActor(): OptionalActor {
+	getLastActor(): OptionalActor {
 		return this.actors[this.actors.length - 1];
 	}
 }
