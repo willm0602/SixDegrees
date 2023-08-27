@@ -39,7 +39,7 @@ export default class TMDBClient {
 
 	// makes a GET call to the TMDB API
 	// returns a promise
-	get(path: string, params: any = {}): any {
+	get(path: string, params: any = {}): Promise<any> {
 		try {
 			const url = new URL('https://api.themoviedb.org/3/' + path);
 			url.searchParams.append('api_key', this.API_KEY);
