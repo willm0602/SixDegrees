@@ -10,25 +10,14 @@ export async function load(request: RequestEvent): Promise<{ actors: Actor[]; }>
 	const params = url.searchParams;
 	const firstActorIDUnparsed = params.get('first');
 	const secondActorIDUnparsed = params.get('second');
-	const actor1Info = firstActorIDUnparsed ?
+	const actor1 = firstActorIDUnparsed ?
 							await TMDB.getActorByID(parseInt(firstActorIDUnparsed)):
 					   		await TMDB.getRandomActor();
 
-	const actor2Info = secondActorIDUnparsed ?
+	const actor2 = secondActorIDUnparsed ?
 			     		await TMDB.getActorByID(parseInt(secondActorIDUnparsed)):
-		   				await TMDB.getRandomActor(actor1Info.id);
+		   				await TMDB.getRandomActor(actor1.tmdbID);
 
-	const actor1: Actor = {
-		name: actor1Info.name,
-		profile_path: actor1Info.profile_path,
-		tmdbID: actor1Info.id
-	};
-
-	const actor2: Actor = {
-		name: actor2Info.name,
-		profile_path: actor2Info.profile_path,
-		tmdbID: actor2Info.id
-	};
 	return {
 		actors: [actor1, actor2]
 	};

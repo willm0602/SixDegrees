@@ -8,6 +8,20 @@ const TMDB = new TMDBClient(API_KEY);
 // Test that we can query TMDB API
 test('We can make a call to the TMDB API with our wrapper using our custom /get function', async () => {
     const res = await TMDB.get('authentication');
-    console.log(res);
-    expect(res, 'Did not get a response from TMDB');
-})
+    expect(res.success, 'Did not get a response from TMDB').toBeTruthy();
+});
+
+test('getRandomActor should return an object of the Actor type', async () => {
+    const randomActor = await TMDB.getRandomActor();
+    expect(randomActor, 'RandomActor doesnt have name').toHaveProperty('name')
+    expect(randomActor, 'RandomActor doesnt have profile_path').toHaveProperty('profile_path')
+    expect(randomActor, 'RandomActor doesnt have tmdbID').toHaveProperty('tmdbID')
+});
+
+test('getRandomActor should never ', async () => {
+    const randomActor = await TMDB.getRandomActor();
+    expect(randomActor, 'RandomActor doesnt have name').toHaveProperty('name')
+    expect(randomActor, 'RandomActor doesnt have profile_path').toHaveProperty('profile_path')
+    expect(randomActor, 'RandomActor doesnt have tmdbID').toHaveProperty('tmdbID')
+});
+
