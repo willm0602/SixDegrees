@@ -27,7 +27,7 @@
 	const getCast = async () => {
 		if (media) {
 			const roles = await fetch(`/api/getActors?media=${JSON.stringify(media)}`, {
-				cache: 'force-cache'
+				cache: 'force-cache',
 			});
 			return roles.json().then((data) => {
 				if (data) {

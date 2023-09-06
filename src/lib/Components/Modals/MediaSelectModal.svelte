@@ -31,7 +31,7 @@
 	const getActorRoles = async () => {
 		if (actor) {
 			const roles = await fetch(`/api/getRoles?id=${actor.tmdbID}`, {
-				cache: 'force-cache'
+				cache: 'force-cache',
 			});
 			return roles.json().then((data) => {
 				if (data) {

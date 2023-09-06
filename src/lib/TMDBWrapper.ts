@@ -5,7 +5,9 @@
 import type Actor from './Game/Actor';
 import type Media from './Game/Media';
 import type Role from './Game/Role';
-import { delay } from './ServerUtils';
+import { delay, getFromCache, setCacheVal } from './ServerUtils';
+
+const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 
 const InvalidTVGenres = [
 	// Dont count talk-shows
@@ -14,7 +16,8 @@ const InvalidTVGenres = [
 
 const InvalidActorIDs = [
 	// Actors that we don't want to include in queries
-	58021
+	58021,
+	1465528
 ]
 
 type TMDBActorResponse = {
@@ -38,7 +41,7 @@ export default class TMDBClient {
 
 	// makes a GET call to the TMDB API
 	// returns a promise
-	get(path: string, params: any = {}): any {
+	async get(path: string, params: any = {}): Promise<any> {
 		try {
 			const url = new URL('https://api.themoviedb.org/3/' + path);
 			url.searchParams.append('api_key', this.API_KEY);
@@ -50,11 +53,11 @@ export default class TMDBClient {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json;charset=utf-8',
-					'cache-control': 'public, max-age=3600'
 				}
 			})
 				.then(async (response) => {
-					return await response.json();
+					const res = await response.json();
+					return await res;
 				})
 				.catch(async () => {
 					await delay(1000);
@@ -66,10 +69,10 @@ export default class TMDBClient {
 		}
 	}
 
-	async getRandomActor(excludeID?: number | undefined): Promise<TMDBActorInfo> {
+	async getRandomActor(excludeID?: number | undefined): Promise<Actor> {
 		const page = Math.floor(Math.random() * 10 + 1);
 		const actors: TMDBActorResponse = await this.get('person/popular', { page });
-		const MIN_POPULARITY = 40;
+		const MIN_POPULARITY = 35;
 		const idsToExclude = InvalidActorIDs;
 		if(excludeID)
 			idsToExclude.push(excludeID);
@@ -91,7 +94,12 @@ export default class TMDBClient {
 			return await wrapper.getRandomActor();
 		}
 		const index = Math.floor(Math.random() * popularActors.length);
-		return popularActors[index];
+		const actorInfo = popularActors[index];
+		return {
+			name: actorInfo.name,
+			profile_path: actorInfo.profile_path,
+			tmdbID: actorInfo.id
+		}
 	}
 
 	async getActorRoles(id: number): Promise<Role[]> {
@@ -208,18 +216,16 @@ export default class TMDBClient {
 		return [];
 	}
 
-	async getActorByID(id: number): Promise<TMDBActorInfo>{
-		const req = await this.get(`person/${id}`);
+	async getActorByID(id: number): Promise<Actor>{
+		const req: TMDBActorInfo = await this.get(`person/${id}`);
 		if(req.id){
 			return {
-				id,
-				known_for: [],
+				tmdbID: id,
 				name: req.name,
 				profile_path: req.profile_path,
-				popularity: req.popularity
 			}
 		}
-		const fallbackActor: TMDBActorInfo = await this.getRandomActor();
+		const fallbackActor: Actor = await this.getRandomActor();
 		return fallbackActor;
 	}
 }
