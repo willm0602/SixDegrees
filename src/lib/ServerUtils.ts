@@ -1,7 +1,6 @@
 // Utilities for stuff that we want to use on the server side
 
 import { env } from '$env/dynamic/private';
-import fs from 'fs';
 import { createClient } from 'redis';
 
 const THIRTY_DAYS_IN_SECONDS = 30 * 24 * 60 * 60;
