@@ -1,10 +1,15 @@
 <script lang="ts">
-	import HeaderLink from "./HeaderLink.svelte";
-
+	import HeaderLink from './HeaderLink.svelte';
+	import openHelpModal from './Modals/HelpModal';
 </script>
 
-<div class="w-full h-14 bg-surface-700 px-4 flex">
-    <HeaderLink route={"/"} css={"ml-0 !bg-surface-700"}><span class="text-primary-500 font-sans">Six Degrees</span></HeaderLink>
-    <HeaderLink route={"/play"} dontReload css="border-r-2 border-surface-600">Play</HeaderLink>
-    <HeaderLink route={"/play"}>New Game</HeaderLink>
+<div class="w-full h-14 bg-surface-700 flex">
+	<HeaderLink route={'/'}><span>Six Degrees</span></HeaderLink
+	>
+	<HeaderLink route={'/play'} dontReload>Play</HeaderLink>
+	<HeaderLink route={'/play'}>New Game</HeaderLink>
+	<HeaderLink onClick={() => {
+		openHelpModal();
+	}}>How to Play?</HeaderLink>
+
 </div>

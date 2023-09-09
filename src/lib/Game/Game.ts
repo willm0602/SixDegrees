@@ -63,18 +63,17 @@ export default class Game {
 	}
 
 	start() {
-		if(this.startTime == undefined){
+		if (this.startTime == undefined) {
 			this.startTime = new Date();
 		}
 	}
 
 	finish() {
-		if(this.endTime == undefined)
-			this.endTime = new Date();
+		if (this.endTime == undefined) this.endTime = new Date();
 	}
 
 	getTotalTime(): Date | undefined {
-		if(this.startTime && this.endTime){
+		if (this.startTime && this.endTime) {
 			const timeAsNum = this.endTime.getTime() - this.startTime.getTime();
 			return new Date(timeAsNum);
 		}
