@@ -26,12 +26,10 @@
 			{#if actor}
 				<MediaSelector idx={Math.floor(index / 2)} {actor} imgCSS={IMGCSS} />
 			{/if}
+		{:else if index > 1}
+			<ActorSelector {actor} index={Math.floor(index / 2)} imgCSS={IMGCSS} />
 		{:else}
-			{#if index > 1}
-				<ActorSelector actor={actor} index={Math.floor(index / 2)} imgCSS={IMGCSS}/>
-			{:else}
-				<ActorCard actor={actor} imgCSS={IMGCSS} />
-			{/if}
+			<ActorCard {actor} imgCSS={IMGCSS} />
 		{/if}
 	{/key}
 </div>

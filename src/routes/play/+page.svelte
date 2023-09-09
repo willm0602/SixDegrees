@@ -20,28 +20,29 @@
 
 	const imgCSS = 'h-36 w-24';
 
-	$page.url.searchParams.set('first', ''+actor1.tmdbID);
-	$page.url.searchParams.set('second', ''+actor2.tmdbID);
+	$page.url.searchParams.set('first', '' + actor1.tmdbID);
+	$page.url.searchParams.set('second', '' + actor2.tmdbID);
 	onMount(() => {
 		goto(`?${$page.url.searchParams.toString()}`);
-	})
+	});
 
-	function swapOrder(){
+	function swapOrder() {
 		const updatedGame = $game?.swap();
 		game.set(updatedGame);
 	}
 </script>
 
 <div class="h-full flex flex-col p-10">
+	<h1 class="h1 mx-auto mb-8">{actor1.name} to {actor2.name}</h1>
 	<div class="flex align-center justify-center h-fit">
 		<ActorCard actor={actor1} {imgCSS} />
 		<span class="h2 mx-10 flex items-center">To</span>
 		<ActorCard actor={actor2} {imgCSS} />
 	</div>
-	<div class="flex mt-24 align-center justify-center">
-		<button class="btn btn-base variant-filled-secondary"
-				on:click={swapOrder}
-		>Swap Order</button>
+	<div class="bg-surface-800 flex flex-col mt-12 w-3/4 m-auto">
+		<div class="flex mt-12 align-center justify-center">
+			<button class="btn btn-base variant-filled-surface" on:click={swapOrder}>Swap Order</button>
+		</div>
+		<GameView />
 	</div>
-	<GameView />
 </div>

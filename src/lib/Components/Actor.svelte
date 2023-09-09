@@ -9,7 +9,6 @@
 	export let index: number = 0;
 	export let imgCSS = '';
 
-
 	const url = `https://image.tmdb.org/t/p/w300/${actor?.profile_path}`;
 	const altText = actor ? `Image of actor ${actor.name}` : 'Undefined actor';
 

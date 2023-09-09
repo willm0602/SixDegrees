@@ -5,7 +5,7 @@
 import type Actor from './Game/Actor';
 import type Media from './Game/Media';
 import type Role from './Game/Role';
-import { delay, getFromCache, setCacheVal } from './ServerUtils';
+import { delay, getFromCache, getObjectFromCache, setCacheVal } from './ServerUtils';
 
 const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 
@@ -16,9 +16,8 @@ const InvalidTVGenres = [
 
 const InvalidActorIDs = [
 	// Actors that we don't want to include in queries
-	58021,
-	1465528
-]
+	58021, 1465528, 3911608
+];
 
 type TMDBActorResponse = {
 	results: TMDBActorInfo[];
@@ -52,7 +51,7 @@ export default class TMDBClient {
 			return fetch(url.toString(), {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json;charset=utf-8',
+					'Content-Type': 'application/json;charset=utf-8'
 				}
 			})
 				.then(async (response) => {
@@ -71,11 +70,14 @@ export default class TMDBClient {
 
 	async getRandomActor(excludeID?: number | undefined): Promise<Actor> {
 		const page = Math.floor(Math.random() * 10 + 1);
-		const actors: TMDBActorResponse = await this.get('person/popular', { page });
+		const cacheKey = `page-actors-${page}`;
+		const actorsFromCache = await getObjectFromCache(cacheKey);
+		const actors: TMDBActorResponse =
+			actorsFromCache || (await this.get('person/popular', { page }));
+		if (!actorsFromCache) setCacheVal(cacheKey, JSON.stringify(actors));
 		const MIN_POPULARITY = 35;
 		const idsToExclude = InvalidActorIDs;
-		if(excludeID)
-			idsToExclude.push(excludeID);
+		if (excludeID) idsToExclude.push(excludeID);
 		const popularActors = actors.results.filter((actor: TMDBActorInfo) => {
 			if (actor.popularity <= MIN_POPULARITY) return false;
 			if (idsToExclude.includes(actor.id)) {
@@ -99,10 +101,13 @@ export default class TMDBClient {
 			name: actorInfo.name,
 			profile_path: actorInfo.profile_path,
 			tmdbID: actorInfo.id
-		}
+		};
 	}
 
 	async getActorRoles(id: number): Promise<Role[]> {
+		const cacheKey = `actor-roles-${id}`;
+		const rolesFromCache = await getObjectFromCache(cacheKey);
+		if (rolesFromCache) return rolesFromCache;
 		const movieCredits = await this.getMovieCreditsForActor(id);
 		const tvCredits = await this.getTVCreditsForActor(id);
 		const foundTitles: string[] = [];
@@ -120,6 +125,7 @@ export default class TMDBClient {
 			if (b.media == undefined) return 1;
 			return a.media.title.localeCompare(b.media.title);
 		});
+		setCacheVal(cacheKey, JSON.stringify(credits));
 		return credits;
 	}
 
@@ -184,46 +190,56 @@ export default class TMDBClient {
 	}
 
 	async getActorsForMedia(media: Media): Promise<Actor[]> {
-		if (!media) {
-			return [];
-		}
+		const cacheKey = `media-actors-${media.mediaType}-${media.tmdbID}`;
+		const actorsFromCache = await getObjectFromCache(cacheKey);
+		if (actorsFromCache) return actorsFromCache;
 		if (media.mediaType == 'movie') {
 			const res = await this.get(`movie/${media.tmdbID}/credits`);
 			if (res) {
 				const castData = res.cast;
-				return castData.map((actor: { [x: string]: any }): Actor => {
+				const actors = castData.map((actor: { [x: string]: any }): Actor => {
 					return {
 						name: actor['name'],
 						tmdbID: actor['id'],
 						profile_path: actor['profile_path']
 					};
 				});
+				setCacheVal(cacheKey, JSON.stringify(actors));
+				return actors;
 			}
 		}
 		if (media.mediaType == 'tv') {
 			const res = await this.get(`tv/${media.tmdbID}/aggregate_credits`);
 			if (res) {
 				const castData = await this.get(`tv/${media.tmdbID}/aggregate_credits`);
-				return castData.cast.map((actor: { [x: string]: any }): Actor => {
+				const cast = castData.cast.map((actor: { [x: string]: any }): Actor => {
 					return {
 						name: actor['name'],
 						tmdbID: actor['id'],
 						profile_path: actor['profile_path']
 					};
 				});
+				setCacheVal(cacheKey, JSON.stringify(cast));
+				return cast;
 			}
 		}
+		console.error(`[ERROR] ${media.mediaType} is not a valid media type`);
 		return [];
 	}
 
-	async getActorByID(id: number): Promise<Actor>{
+	async getActorByID(id: number): Promise<Actor> {
+		const cacheKey = `actor-${id}`;
+		const actorFromCache = await getObjectFromCache(cacheKey);
+		if (actorFromCache) return actorFromCache;
 		const req: TMDBActorInfo = await this.get(`person/${id}`);
-		if(req.id){
-			return {
+		if (req.id) {
+			const actor = {
 				tmdbID: id,
 				name: req.name,
-				profile_path: req.profile_path,
-			}
+				profile_path: req.profile_path
+			};
+			setCacheVal(cacheKey, JSON.stringify(actor));
+			return actor;
 		}
 		const fallbackActor: Actor = await this.getRandomActor();
 		return fallbackActor;

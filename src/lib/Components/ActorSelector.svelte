@@ -1,13 +1,8 @@
 <script lang="ts">
 	import type Actor from '$lib/Game/Actor';
-	import {
-		modalStore,
-		type ModalSettings,
-		Modal
-	} from '@skeletonlabs/skeleton';
+	import { modalStore, type ModalSettings, Modal } from '@skeletonlabs/skeleton';
 
 	import { editingActorIndex, game } from '$lib/dataStore';
-
 
 	import type Media from '$lib/Game/Media';
 	import ActorCard from './ActorCard.svelte';

@@ -10,11 +10,12 @@
 	// Finally, your application's global stylesheet (sometimes labeled 'app.css')
 	import '../app.postcss';
 
-
 	import Header from '$lib/Components/Header.svelte';
 </script>
 
-<main class="bg-surface-50-900-token w-full h-screen font-mono flex flex-col">
-	<Header/>
+<svelte:head><title>Six Degrees</title></svelte:head>
+
+<main class="bg-surface-50-900-token w-full h-screen font-mono flex flex-col" lang="en">
+	<Header />
 	<slot />
 </main>

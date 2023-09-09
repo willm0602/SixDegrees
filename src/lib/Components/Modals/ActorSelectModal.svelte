@@ -6,6 +6,7 @@
 
 	import { game, editingActorIndex, moveRight } from '$lib/dataStore';
 	import { modalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import SearchBar from '../SearchBar.svelte';
 
 	const idx = $editingActorIndex;
 	const media = $game?.media[idx - 1];
@@ -26,8 +27,8 @@
 
 	const getCast = async () => {
 		if (media) {
-			const roles = await fetch(`/api/getActors?media=${JSON.stringify(media)}`, {
-				cache: 'force-cache',
+			const roles = await fetch(`/api/getActors?media=${media.tmdbID}&mediaType=${media.mediaType}`, {
+				cache: 'force-cache'
 			});
 			return roles.json().then((data) => {
 				if (data) {
@@ -43,13 +44,12 @@
 
 	getCast();
 
-
 	const gameSummaryModal: ModalSettings = {
 		type: 'component',
 		component: 'gameSummary'
 	};
 	function checkForWin() {
-		if($game?.gameHasWon()){
+		if ($game?.gameHasWon()) {
 			$game.finish();
 			modalStore.trigger(gameSummaryModal);
 		}
@@ -57,12 +57,7 @@
 </script>
 
 <div class="w-3/4 h-3/4 max-h-3/4 overflow-y-scroll pt-1/4 bg-surface-800">
-	<div class="w-full items-center flex justify-center">
-		<div class="input w-1/2 m-8 flex">
-			<iconify-icon icon="material-symbols:search" class="text-4xl" />
-			<input type="text" class="flex-1 bg-surface-700" bind:value={$searchQuery} />
-		</div>
-	</div>
+	<SearchBar value={searchQuery}/>
 	{#await getCast()}
 		<span>Loading Roles...</span>
 	{:then _}
