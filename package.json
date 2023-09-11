@@ -11,7 +11,7 @@
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
 		"test": "vitest",
-		"coverage": "vitest run --coverage",
+		"coverage": "vitest run --coverage"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^8.0.2",
