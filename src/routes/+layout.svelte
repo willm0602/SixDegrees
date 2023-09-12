@@ -11,6 +11,7 @@
 	import '../app.postcss';
 
 	import Header from '$lib/Components/Header.svelte';
+	import Footer from "$lib/Components/Footer.svelte";
 </script>
 
 <svelte:head><title>Six Degrees</title></svelte:head>
@@ -18,4 +19,5 @@
 <main class="bg-surface-50-900-token w-full h-screen font-mono flex flex-col" lang="en">
 	<Header />
 	<slot />
+	<Footer/>
 </main>
