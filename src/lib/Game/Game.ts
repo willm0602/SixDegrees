@@ -47,7 +47,7 @@ export default class Game {
 		this.media = this.media.slice(0, index);
 		this.actors = this.actors.slice(0, index);
 		this.actors.push(actor);
-		if (!this.gameHasWon()) {
+		if (this.canAddMedia()) {
 			this.media.push(undefined);
 		}
 		return this;
@@ -60,6 +60,10 @@ export default class Game {
 	hasActor(actor: Actor): boolean {
 		for (const actorInList of this.actors) if (actor?.tmdbID == actorInList?.tmdbID) return true;
 		return false;
+	}
+
+	canAddMedia(): boolean{
+		return this.media.length < 6 && !this.gameHasWon();
 	}
 
 	start() {

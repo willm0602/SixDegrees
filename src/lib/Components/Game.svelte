@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type Game from '$lib/Game/Game';
-	import { game } from '$lib/dataStore';
+	import { cardCount, carouselStart, game, screenWidthInPixels } from '$lib/dataStore';
 	import GamePath from './GamePath.svelte';
 
 	import 'iconify-icon';
 	import AllModals from './Modals/AllModals.svelte';
 	import Carousel from './Carousel.svelte';
+	import { onMount } from 'svelte';
+	import isTablet, { isMobile } from '$lib/FrontendUtils';
+
 
 	let currGame = $game as Game;
 
@@ -13,37 +16,47 @@
 		currGame = newGame as Game;
 	});
 
-	function swapOrder() {
-		const gameWithSwappedOrder = $game?.swap();
-		game.set(gameWithSwappedOrder);
-	}
+	cardCount.subscribe((newCardCount) => {
+		console.log(newCardCount);
+	})
 
-	// The logic for the carousel was borrowed from the sveltekit skeleton docs https://www.skeleton.dev/elements/scroll-containers
-	let elemMovies: HTMLDivElement;
+	screenWidthInPixels.subscribe((newWidth) => {
+		cardCount.set(
+			isMobile() ? 1 :
+			isTablet() ? 3 :
+			7
+		)
+	})
 
-	function multiColumnLeft(): void {
-		let x = elemMovies.scrollWidth;
-		if (elemMovies.scrollLeft !== 0) x = elemMovies.scrollLeft - elemMovies.clientWidth;
-		elemMovies.scroll(x, 0);
-	}
+	onMount(() => {
 
-	function multiColumnRight(): void {
-		let x = 0;
-		// -1 is used because different browsers use different methods to round scrollWidth pixels.
-		if (elemMovies.scrollLeft < elemMovies.scrollWidth - elemMovies.clientWidth - 1)
-			x = elemMovies.scrollLeft + elemMovies.clientWidth;
-		elemMovies.scroll(x, 0);
-	}
+		screenWidthInPixels.set(window.screen.availWidth);
+
+		// Adjust the number of cards shown if the window resizes
+		window.addEventListener<'resize'>('resize', (e) => {
+			// @ts-ignore
+			const width: number = e.target.screen.width;
+			screenWidthInPixels.set(width);
+		})
+	})
+
+
 </script>
 
 <AllModals />
 
 <Carousel>
 	{#key $game}
-		{#if $game}
-			{#each { length: $game ? $game.getPathSize() : 0 } as _, idx}
+	{#key $carouselStart}
+	{#key $cardCount}
+	{#if $game}
+		{#each { length: $game ? $game.getPathSize() : 0 } as _, idx}
+			{#if idx >= $carouselStart && idx < ($carouselStart + $cardCount)}
 				<GamePath index={idx} />
-			{/each}
-		{/if}
+			{/if}
+		{/each}
+	{/if}
+	{/key}
+	{/key}
 	{/key}
 </Carousel>

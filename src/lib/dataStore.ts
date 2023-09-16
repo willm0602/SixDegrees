@@ -12,4 +12,8 @@ const moveRight: Writable<CallableFunction> = writable(() => {
 	console.warn('Error: Move Left has been called but not defined');
 });
 
-export { game, editingActorIndex, editingMediaIndex, moveLeft, moveRight };
+const carouselStart = writable(0);
+const cardCount = writable(1);
+const screenWidthInPixels = writable(0);
+
+export { game, editingActorIndex, editingMediaIndex, moveLeft, moveRight, carouselStart, cardCount, screenWidthInPixels };
