@@ -16,10 +16,6 @@
 		currGame = newGame as Game;
 	});
 
-	cardCount.subscribe((newCardCount) => {
-		console.log(newCardCount);
-	})
-
 	screenWidthInPixels.subscribe((newWidth) => {
 		cardCount.set(
 			isMobile() ? 1 :
