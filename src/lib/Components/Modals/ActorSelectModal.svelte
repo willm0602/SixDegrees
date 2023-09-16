@@ -1,48 +1,38 @@
 <script lang="ts">
-	import type Actor from '$lib/Game/Actor';
-	import { writable } from 'svelte/store';
+	import type Actor from "$lib/Game/Actor";
+	import SelectModal from "./SelectModal.svelte";
 
-	import 'iconify-icon';
-
-	import { game, editingActorIndex, moveRight } from '$lib/dataStore';
-	import { modalStore, type ModalSettings } from '@skeletonlabs/skeleton';
-	import SearchBar from '../SearchBar.svelte';
+	import { editingActorIndex, game, moveRight } from "$lib/dataStore";
+	import { modalStore, type ModalSettings } from "@skeletonlabs/skeleton";
+	import type SearchOption from "../types/SearchOption";
 
 	const idx = $editingActorIndex;
 	const media = $game?.media[idx - 1];
 
-	let searchQuery = writable('');
+	type ActorSearchOption = SearchOption<Actor>
 
-	let allActors: Actor[];
-	let foundActors: Actor[];
-
-	searchQuery.subscribe((query) => {
-		const lowercaseQuery = query.toLowerCase();
-		if (allActors) {
-			foundActors = allActors.filter((actor) => {
-				return actor?.profile_path && actor.name.toLowerCase().includes(lowercaseQuery);
-			});
-		}
-	});
-
-	const getCast = async () => {
+	const getCast = async (): Promise<ActorSearchOption[]> => {
 		if (media) {
 			const roles = await fetch(`/api/getActors?media=${media.tmdbID}&mediaType=${media.mediaType}`, {
 				cache: 'force-cache'
 			});
 			return roles.json().then((data) => {
 				if (data) {
-					allActors = data.filter((actor: Actor) => {
+					return data.filter((actor: Actor) => {
 						return actor && actor.profile_path;
-					});
-					foundActors = allActors;
+					}).map((actor: Actor): ActorSearchOption => {
+						return {
+							image: 'https://image.tmdb.org/t/p/w300/' + actor.profile_path,
+							name: actor.name,
+							option: actor
+						}
+					})
 				}
 			});
 		}
-		return [];
+		const result: ActorSearchOption[] = [];
+		return result;
 	};
-
-	getCast();
 
 	const gameSummaryModal: ModalSettings = {
 		type: 'component',
@@ -54,34 +44,17 @@
 			modalStore.trigger(gameSummaryModal);
 		}
 	}
+
+	function onClick(searchOption: ActorSearchOption){
+		game.set($game?.setActor(idx, searchOption.option));
+		modalStore.close();
+		$moveRight();
+		checkForWin();
+	}
 </script>
 
-<div class="w-3/4 h-3/4 max-h-3/4 overflow-y-scroll pt-1/4 bg-surface-800">
-	<SearchBar value={searchQuery}/>
-	{#await getCast()}
-		<span>Loading Roles...</span>
-	{:then _}
-		<div class="flex flex-wrap columns-3 bg-surface-800 max-h-9/10 justify-center">
-			{#each foundActors as actor}
-				<!-- svelte-ignore a11y-missing-attribute -->
-				<a title={`${actor?.name}`} rel="tooltip">
-					<button
-						class="card w-36 p-4 m-6 hover:bg-surface-600"
-						on:click={() => {
-							game.set($game?.setActor(idx, actor));
-							$moveRight();
-							modalStore.close();
-							checkForWin();
-						}}
-					>
-						<img
-							class="w-full h-120"
-							src={`https://image.tmdb.org/t/p/w300/${actor?.profile_path}`}
-							alt={`Image of ${actor?.name}`}
-						/>
-					</button>
-				</a>
-			{/each}
-		</div>
-	{/await}
-</div>
+<SelectModal
+	getOptions={getCast()}
+	onSelect={onClick}
+/>
+

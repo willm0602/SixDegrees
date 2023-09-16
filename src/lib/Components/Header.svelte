@@ -1,6 +1,6 @@
 <script lang="ts">
 	import HeaderLink from './HeaderLink.svelte';
-	import openHelpModal from './Modals/HelpModal';
+	import openHelpModal from './types/HelpModal';
 </script>
 
 <div class="w-full h-14 bg-surface-700 flex">
