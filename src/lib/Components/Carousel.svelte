@@ -35,29 +35,26 @@
 {#key screenWidthInPixels}
 	<div class={carouselClass}>
 		<button
-			class="btn h-10 self-center {
-				canMoveLeft() ? 
-				'variant-filled-surface' : 
-				'variant-ghost-surface text-gray-700'} w-20"
-			on:click={() => {
-				$moveLeft();
-			}}
-			>
-			<iconify-icon icon="octicon:arrow-left-16" class="text-4xl" />
-		</button>
+		class="btn h-10 self-center variant-filled-surface w-20"
+		on:click={() => {
+			$moveLeft();
+		}}
+		>
+		<iconify-icon icon="octicon:arrow-left-16" class="text-4xl" />
+	</button>
 
-		<div class="relative flex-grow">
-			<div class="flex overflow-x-hidden min-h-[16rem] justify-center" bind:this={carousel}>
-				<slot />
-			</div>
+	<div class="relative flex-grow">
+		<div class="flex overflow-x-hidden min-h-[16rem] justify-center" bind:this={carousel}>
+			<slot />
 		</div>
+	</div>
 
-		<button
-			class="btn {canMoveRight() ? 'variant-filled-surface' : 'variant-ghost-surface text-gray-700'} h-10 self-center w-20"
-			on:click={() => {
-				$moveRight();
-			}}><iconify-icon icon="octicon:arrow-right-16" class="text-4xl" />
-		</button>
+	<button
+		class="btn variant-filled-surface h-10 self-center w-20"
+		on:click={() => {
+			$moveRight();
+		}}><iconify-icon icon="octicon:arrow-right-16" class="text-4xl" />
+	</button>
 	</div>
 
 {/key}
