@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type Role from '$lib/Game/Role';
+	import type Role from '$lib/Game/Role'
+    import type SearchOption from '../types/SearchOption';
 	import { writable } from 'svelte/store';
 
 	import 'iconify-icon';
@@ -7,76 +8,47 @@
 	import { game } from '$lib/dataStore';
 	import { editingMediaIndex, moveRight } from '$lib/dataStore';
 	import { modalStore } from '@skeletonlabs/skeleton';
-	import SearchBar from '../SearchBar.svelte';
+	import SelectModal from './SelectModal.svelte';
 
 	const idx = $editingMediaIndex;
 	const actor = $game?.actors[idx];
 
-	let searchQuery = writable('');
+    type MediaSelectOption = SearchOption<Role>;
 
-	let allRoles: Role[];
-	let foundRoles: Role[];
-	searchQuery.subscribe((query) => {
-		const lowercaseQuery = query.toLowerCase();
-		if (allRoles) {
-			foundRoles = allRoles.filter((role) => {
-				return (
-					role.media?.posterPath &&
-					(role.characterName.toLowerCase().includes(lowercaseQuery) ||
-						role.media?.title.toLowerCase().includes(lowercaseQuery))
-				);
-			});
-		}
-	});
-
-	const getActorRoles = async () => {
+	const getActorRoles = async (): Promise<MediaSelectOption[]> => {
 		if (actor) {
 			const roles = await fetch(`/api/getRoles?id=${actor.tmdbID}`, {
 				cache: 'force-cache'
 			});
 			return roles.json().then((data) => {
 				if (data) {
-					allRoles = data.filter((role: Role) => {
-						return role.media?.posterPath;
-					});
-					foundRoles = allRoles;
+					const roles = data.filter((role: Role) => {
+						return role.media.posterPath;
+					}).map((role: Role): MediaSelectOption => {
+                        return {
+                            name: role.characterName + ' in ' + role.media.title,
+                            image: `https://image.tmdb.org/t/p/w300/${role.media.posterPath}`,
+                            option: role
+                        }
+                    });
+                    return roles;
 				}
+                const res: MediaSelectOption[] = [];
+                return res;
 			});
 		}
-		return [];
+		const res: MediaSelectOption[] = [];
+        return res;
 	};
+
+    function onClick(option: SearchOption<Role>): void{
+        game.set($game?.setMedia(idx, option.option.media));
+        modalStore.close();
+        $moveRight();
+    }
 </script>
 
-<div class="w-3/4 h-3/4 max-h-3/4 pt-1/4 bg-surface-800 overflow-auto">
-	<SearchBar value={searchQuery}/>
-
-	{#await getActorRoles()}
-		<span>Loading Roles...</span>
-	{:then _}
-		<div
-			class="flex flex-wrap columns-3 overflow-y-scroll max-y-9/10 bg-surface-800 max-h-9/10 justify-center"
-		>
-			{#key foundRoles}
-				{#each foundRoles as role}
-					<!-- svelte-ignore a11y-missing-attribute -->
-					<a title={`${role.characterName} in ${role.media?.title}`} rel="tooltip">
-						<button
-							class="card w-36 p-4 m-6 hover:bg-surface-600"
-							on:click={() => {
-								game.set($game?.setMedia(idx, role.media));
-								$moveRight();
-								modalStore.close();
-							}}
-						>
-							<img
-								class="w-full h-120"
-								src={`https://image.tmdb.org/t/p/w300/${role.media?.posterPath}`}
-								alt={`Image of ${role.media?.title}`}
-							/>
-						</button>
-					</a>
-				{/each}
-			{/key}
-		</div>
-	{/await}
-</div>
+<SelectModal
+    getOptions={getActorRoles()}
+    onSelect={onClick}
+/>

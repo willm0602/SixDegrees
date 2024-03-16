@@ -12,11 +12,14 @@
 
 	import Header from '$lib/Components/Header.svelte';
 	import Footer from "$lib/Components/Footer.svelte";
+
+	import { Modal, modalStore } from '@skeletonlabs/skeleton';
 </script>
 
 <svelte:head><title>Six Degrees</title></svelte:head>
 
 <main class="bg-surface-50-900-token w-full h-screen font-mono flex flex-col" lang="en">
+	<Modal />
 	<Header />
 	<slot />
 	<Footer/>
