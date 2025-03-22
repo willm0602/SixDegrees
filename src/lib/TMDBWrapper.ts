@@ -78,7 +78,8 @@ export default class TMDBClient {
 		const cacheKey = `page-actors-${page}`;
 		const actorsFromCache = await getObjectFromCache(cacheKey);
 		const actors: TMDBActorResponse =
-			actorsFromCache || (await this.get("person/popular", { page }));
+			actorsFromCache ||
+			(await this.get("person/popular", { page, include_adult: false }));
 		if (!actorsFromCache) setCacheVal(cacheKey, JSON.stringify(actors));
 		const MIN_POPULARITY = 3;
 		const idsToExclude = InvalidActorIDs;
