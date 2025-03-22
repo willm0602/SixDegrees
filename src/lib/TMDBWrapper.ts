@@ -21,7 +21,7 @@ const InvalidTVGenres = [
 
 const InvalidActorIDs = [
 	// Actors that we don't want to include in queries
-	58021, 1465528, 3911608,
+	58021, 1465528, 3911608, 2784321, 31490, 5197787,
 ];
 
 type TMDBActorResponse = {
