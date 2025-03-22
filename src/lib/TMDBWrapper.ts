@@ -21,7 +21,7 @@ const InvalidTVGenres = [
 
 const InvalidActorIDs = [
 	// Actors that we don't want to include in queries
-	58021, 1465528, 3911608,
+	58021, 1465528, 3911608, 2784321, 31490, 5197787, 58191, 5197773,
 ];
 
 type TMDBActorResponse = {
@@ -78,7 +78,8 @@ export default class TMDBClient {
 		const cacheKey = `page-actors-${page}`;
 		const actorsFromCache = await getObjectFromCache(cacheKey);
 		const actors: TMDBActorResponse =
-			actorsFromCache || (await this.get("person/popular", { page }));
+			actorsFromCache ||
+			(await this.get("person/popular", { page, include_adult: false }));
 		if (!actorsFromCache) setCacheVal(cacheKey, JSON.stringify(actors));
 		const MIN_POPULARITY = 3;
 		const idsToExclude = InvalidActorIDs;
