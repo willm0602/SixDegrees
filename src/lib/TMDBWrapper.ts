@@ -2,21 +2,26 @@
 // wrapper for the TMDB API
 // https://developer.themoviedb.org/v3/docs
 
-import type Actor from './Game/Actor';
-import type Media from './Game/Media';
-import type Role from './Game/Role';
-import { delay, getFromCache, getObjectFromCache, setCacheVal } from './ServerUtils';
+import type Actor from "./Game/Actor";
+import type Media from "./Game/Media";
+import type Role from "./Game/Role";
+import {
+	delay,
+	getFromCache,
+	getObjectFromCache,
+	setCacheVal,
+} from "./ServerUtils";
 
 const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 
 const InvalidTVGenres = [
 	// Dont count talk-shows
-	10767
+	10767,
 ];
 
 const InvalidActorIDs = [
 	// Actors that we don't want to include in queries
-	58021, 1465528, 3911608
+	58021, 1465528, 3911608,
 ];
 
 type TMDBActorResponse = {
@@ -42,17 +47,17 @@ export default class TMDBClient {
 	// returns a promise
 	async get(path: string, params: any = {}): Promise<any> {
 		try {
-			const url = new URL('https://api.themoviedb.org/3/' + path);
-			url.searchParams.append('api_key', this.API_KEY);
-			url.searchParams.append('language', 'en-US');
+			const url = new URL("https://api.themoviedb.org/3/" + path);
+			url.searchParams.append("api_key", this.API_KEY);
+			url.searchParams.append("language", "en-US");
 			for (const key in params) {
 				url.searchParams.append(key, params[key]);
 			}
 			return fetch(url.toString(), {
-				method: 'GET',
+				method: "GET",
 				headers: {
-					'Content-Type': 'application/json;charset=utf-8'
-				}
+					"Content-Type": "application/json;charset=utf-8",
+				},
 			})
 				.then(async (response) => {
 					const res = await response.json();
@@ -64,7 +69,7 @@ export default class TMDBClient {
 				});
 		} catch (e) {
 			console.error(e);
-			throw 'GET ERROR';
+			throw "GET ERROR";
 		}
 	}
 
@@ -73,9 +78,9 @@ export default class TMDBClient {
 		const cacheKey = `page-actors-${page}`;
 		const actorsFromCache = await getObjectFromCache(cacheKey);
 		const actors: TMDBActorResponse =
-			actorsFromCache || (await this.get('person/popular', { page }));
+			actorsFromCache || (await this.get("person/popular", { page }));
 		if (!actorsFromCache) setCacheVal(cacheKey, JSON.stringify(actors));
-		const MIN_POPULARITY = 35;
+		const MIN_POPULARITY = 3;
 		const idsToExclude = InvalidActorIDs;
 		if (excludeID) idsToExclude.push(excludeID);
 		const popularActors = actors.results.filter((actor: TMDBActorInfo) => {
@@ -84,7 +89,7 @@ export default class TMDBClient {
 				return false;
 			}
 			for (const knownWork of actor.known_for) {
-				if (knownWork.original_language == 'en') {
+				if (knownWork.original_language == "en") {
 					return true;
 				}
 			}
@@ -100,7 +105,7 @@ export default class TMDBClient {
 		return {
 			name: actorInfo.name,
 			profile_path: actorInfo.profile_path,
-			tmdbID: actorInfo.id
+			tmdbID: actorInfo.id,
 		};
 	}
 
@@ -134,19 +139,24 @@ export default class TMDBClient {
 		if (movieData) {
 			const actingCredits = movieData.cast;
 			const roles: Role[] = actingCredits.map(
-				(credit: { poster_path: string; character: any; title: any; id: any }) => {
+				(credit: {
+					poster_path: string;
+					character: any;
+					title: any;
+					id: any;
+				}) => {
 					const media: Media = {
 						title: credit.title,
 						tmdbID: credit.id,
-						mediaType: 'movie',
-						posterPath: credit.poster_path
+						mediaType: "movie",
+						posterPath: credit.poster_path,
 					};
 					return {
 						actorID: id,
 						media,
-						characterName: credit.character
+						characterName: credit.character,
 					};
-				}
+				},
 			);
 			return roles;
 		}
@@ -157,12 +167,14 @@ export default class TMDBClient {
 		const tvData = await this.get(`person/${id}/tv_credits`);
 		const actingCredits = tvData.cast;
 		if (actingCredits) {
-			const validActingCredits = actingCredits.filter((credit: { genre_ids: number[] }) => {
-				for (const invalidGenre of InvalidTVGenres) {
-					if (credit.genre_ids.includes(invalidGenre)) return false;
-				}
-				return true;
-			});
+			const validActingCredits = actingCredits.filter(
+				(credit: { genre_ids: number[] }) => {
+					for (const invalidGenre of InvalidTVGenres) {
+						if (credit.genre_ids.includes(invalidGenre)) return false;
+					}
+					return true;
+				},
+			);
 			const roles: Role[] = validActingCredits.map(
 				(credit: {
 					poster_path: string;
@@ -174,15 +186,15 @@ export default class TMDBClient {
 					const media: Media = {
 						title: credit.original_name,
 						tmdbID: credit.id,
-						mediaType: 'tv',
-						posterPath: credit.poster_path
+						mediaType: "tv",
+						posterPath: credit.poster_path,
 					};
 					return {
 						actorID: id,
 						media,
-						characterName: credit.character
+						characterName: credit.character,
 					};
-				}
+				},
 			);
 			return roles;
 		}
@@ -193,30 +205,30 @@ export default class TMDBClient {
 		const cacheKey = `media-actors-${media.mediaType}-${media.tmdbID}`;
 		const actorsFromCache = await getObjectFromCache(cacheKey);
 		if (actorsFromCache) return actorsFromCache;
-		if (media.mediaType == 'movie') {
+		if (media.mediaType == "movie") {
 			const res = await this.get(`movie/${media.tmdbID}/credits`);
 			if (res) {
 				const castData = res.cast;
 				const actors = castData.map((actor: { [x: string]: any }): Actor => {
 					return {
-						name: actor['name'],
-						tmdbID: actor['id'],
-						profile_path: actor['profile_path']
+						name: actor["name"],
+						tmdbID: actor["id"],
+						profile_path: actor["profile_path"],
 					};
 				});
 				setCacheVal(cacheKey, JSON.stringify(actors));
 				return actors;
 			}
 		}
-		if (media.mediaType == 'tv') {
+		if (media.mediaType == "tv") {
 			const res = await this.get(`tv/${media.tmdbID}/aggregate_credits`);
 			if (res) {
 				const castData = await this.get(`tv/${media.tmdbID}/aggregate_credits`);
 				const cast = castData.cast.map((actor: { [x: string]: any }): Actor => {
 					return {
-						name: actor['name'],
-						tmdbID: actor['id'],
-						profile_path: actor['profile_path']
+						name: actor["name"],
+						tmdbID: actor["id"],
+						profile_path: actor["profile_path"],
 					};
 				});
 				setCacheVal(cacheKey, JSON.stringify(cast));
@@ -236,7 +248,7 @@ export default class TMDBClient {
 			const actor = {
 				tmdbID: id,
 				name: req.name,
-				profile_path: req.profile_path
+				profile_path: req.profile_path,
 			};
 			setCacheVal(cacheKey, JSON.stringify(actor));
 			return actor;
