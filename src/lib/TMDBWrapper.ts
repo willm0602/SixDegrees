@@ -86,6 +86,7 @@ export default class TMDBClient {
 		if (excludeID) idsToExclude.push(excludeID);
 		const popularActors = actors.results.filter((actor: TMDBActorInfo) => {
 			if (actor.popularity <= MIN_POPULARITY) return false;
+			if (!actor.profile_path) return false;
 			if (idsToExclude.includes(actor.id)) {
 				return false;
 			}
