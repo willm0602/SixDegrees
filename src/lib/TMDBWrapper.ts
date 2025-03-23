@@ -21,7 +21,7 @@ const InvalidTVGenres = [
 
 const InvalidActorIDs = [
 	// Actors that we don't want to include in queries
-	58021, 1465528, 3911608, 2784321, 31490, 5197787, 58191, 5197773,
+	58021, 1465528, 3911608, 2784321, 31490, 5197787, 58191, 5197773, 2994385,
 ];
 
 type TMDBActorResponse = {
@@ -86,6 +86,7 @@ export default class TMDBClient {
 		if (excludeID) idsToExclude.push(excludeID);
 		const popularActors = actors.results.filter((actor: TMDBActorInfo) => {
 			if (actor.popularity <= MIN_POPULARITY) return false;
+			if (!actor.profile_path) return false;
 			if (idsToExclude.includes(actor.id)) {
 				return false;
 			}
